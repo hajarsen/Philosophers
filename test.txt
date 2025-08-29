@@ -1,0 +1,40 @@
+
+# DRD tests
+valgrind --tool=drd ./philo 1 800 200 200             # a philo should die
+valgrind --tool=drd ./philo 4 310 200 100             # a philo should die
+valgrind --tool=drd ./philo 4 200 205 200             # a philo should die
+valgrind --tool=drd ./philo 5 800 200 200 7           # no one should die, stop after 7 eats
+valgrind --tool=drd ./philo 4 410 200 200 10          # no one should die, stop after 10 eats
+valgrind --tool=drd ./philo -5 600 200 200            # error, should not run (no crash)
+valgrind --tool=drd ./philo 4 -5 200 200              # error, should not run (no crash)
+valgrind --tool=drd ./philo 4 600 -5 200              # error, should not run (no crash)
+valgrind --tool=drd ./philo 4 600 200 -5              # error, should not run (no crash)
+valgrind --tool=drd ./philo 4 600 200 200 -5          # error, should not run (no crash)
+
+# DRD tests — additional scenarios (no one should die)
+valgrind --tool=drd ./philo 5 800 200 200             # no one should die
+valgrind --tool=drd ./philo 5 600 150 150             # no one should die
+valgrind --tool=drd ./philo 4 410 200 200             # no one should die
+valgrind --tool=drd ./philo 100 800 200 200           # no one should die
+valgrind --tool=drd ./philo 105 800 200 200           # no one should die
+valgrind --tool=drd ./philo 200 800 200 200           # no one should die
+
+# Helgrind tests
+valgrind --tool=helgrind ./philo 1 800 200 200             # a philo should die
+valgrind --tool=helgrind ./philo 4 310 200 100             # a philo should die
+valgrind --tool=helgrind ./philo 4 200 205 200             # a philo should die
+valgrind --tool=helgrind ./philo 5 800 200 200 7           # no one should die, stop after 7 eats
+valgrind --tool=helgrind ./philo 4 410 200 200 10          # no one should die, stop after 10 eats
+valgrind --tool=helgrind ./philo -5 600 200 200            # error, should not run (no crash)
+valgrind --tool=helgrind ./philo 4 -5 200 200              # error, should not run (no crash)
+valgrind --tool=helgrind ./philo 4 600 -5 200              # error, should not run (no crash)
+valgrind --tool=helgrind ./philo 4 600 200 -5              # error, should not run (no crash)
+valgrind --tool=helgrind ./philo 4 600 200 200 -5          # error, should not run (no crash)
+
+# Helgrind tests — additional scenarios (no one should die)
+valgrind --tool=helgrind ./philo 5 800 200 200             # no one should die
+valgrind --tool=helgrind ./philo 5 600 150 150             # no one should die
+valgrind --tool=helgrind ./philo 4 410 200 200             # no one should die
+valgrind --tool=helgrind ./philo 100 800 200 200           # no one should die
+valgrind --tool=helgrind ./philo 105 800 200 200           # no one should die
+valgrind --tool=helgrind ./philo 200 800 200 200           # no one should die
