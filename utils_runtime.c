@@ -45,7 +45,7 @@ void	print_status(t_philo *philosopher, int status)
 
 	pthread_mutex_lock(philosopher->print_mutex);
 	now = ft_get_time() - philosopher->start_time;
-	if (status == DIED || (status != DIED && *philosopher->is_dead == 0))
+	if (status == DIED || (status != DIED && philo_is_alive(philosopher)))
 	{
 		printf("%zu %d %s%s\033[0m\n", now, philosopher->philo_id,
 			status_colors[status], status_msgs[status]);
