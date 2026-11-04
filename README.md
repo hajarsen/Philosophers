@@ -191,6 +191,27 @@ This means philosopher 3 began eating 201 milliseconds after the simulation's re
 
 See [`time.c`](time.c), [`lifecycle.c`](lifecycle.c) and [`utils_runtime.c`](utils_runtime.c).
 
+### Debugging Tips
+
+When testing concurrent programs, timing and synchronization issues
+may not appear consistently between runs.
+
+Some useful checks:
+
+- **Deadlocks:** Verify that philosophers do not remain blocked
+  indefinitely while waiting for forks.
+- **Race conditions:** Use Valgrind's Helgrind tool to help detect
+  synchronization problems.
+- **Starvation:** Check whether philosophers can eat before
+  reaching their death deadline.
+- **Timing:** Run the same simulation multiple times because
+  thread scheduling can vary between executions.
+
+For example, run:
+
+```bash
+./philo 5 800 200 200
+
 ### References
 
 - [POSIX threads — Linux manual](https://man7.org/linux/man-pages/man7/pthreads.7.html)
