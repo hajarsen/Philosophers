@@ -92,6 +92,15 @@ The tester accepts optional settings, including `-i` to choose iteration count. 
 
 The presence of this testing reference does not imply that all tests have been passed.
 
+### Quick Test Examples
+
+| Command | What to check |
+|---|---|
+| `./philo 1 800 200 200` | One philosopher eventually dies because they cannot take two forks. |
+| `./philo 2 800 200 200` | Two philosophers compete for the shared forks. |
+| `./philo 5 800 200 200` | Five philosophers eat, sleep, and think while their deadlines are monitored. |
+| `./philo 5 800 200 200 7` | The simulation stops when everyone has eaten seven times. |
+
 ## Resources
 
 ### Threads and Shared Resources
