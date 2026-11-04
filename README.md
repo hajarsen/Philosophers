@@ -71,35 +71,92 @@ The presence of this testing reference does not imply that all tests have been p
 
 ## Resources
 
-### The Dining Philosophers Problem
+### Threads and Shared Resources
 
-Each philosopher repeatedly follows the same cycle:
+Each philosopher runs in a separate POSIX thread. They share access to the same set of forks, so their execution order depends on the operating system's scheduler.
 
-1. Take two forks.
-2. Eat for `time_to_eat` milliseconds.
-3. Release both forks.
-4. Sleep for `time_to_sleep` milliseconds.
-5. Think before attempting the next meal.
+A **mutex** gives one thread exclusive access to a resource:
 
-Two neighboring philosophers cannot use the same fork simultaneously. If every philosopher holds one fork while waiting for another, the system can enter a **deadlock**. A philosopher can also experience **starvation** if they cannot obtain forks before their deadline.
+```text
+Philosopher A          Shared fork           Philosopher B
+      |                     |                      |
+      +---- lock() -------->|                      |
+      |                 [in use]                  |
+      |                     |<------ lock() -------+
+      |                     |       waits          |
+      +---- unlock() ------>|                      |
+      |                  [free]                    |
+      |                     +---- acquired ------->+
+```
 
-### Threads and Mutexes
+The forks are represented by `pthread_mutex_t` objects in [`philosophers.h`](philosophers.h). The program acquires and releases them in [`lifecycle.c`](lifecycle.c).
 
-Each philosopher runs in a separate `pthread` thread. A **mutex** protects each fork so that only one philosopher holds it at a time.
+### Avoiding Deadlock
 
-The implementation also uses mutexes to coordinate printing, meal-related state, and the shared termination flag. Fork acquisition order varies with philosopher ID to reduce simultaneous contention.
+If all five philosophers take their left fork first, they can end up in a circular wait:
 
-### Monitoring and Timing
+```text
+P1 waits for P2's fork
+P2 waits for P3's fork
+P3 waits for P4's fork
+P4 waits for P5's fork
+P5 waits for P1's fork
+        -> deadlock
+```
 
-A separate monitoring thread regularly checks when each philosopher last ate and whether the optional meal target has been reached.
+This implementation varies the fork acquisition order by philosopher ID: **even-numbered philosophers take the left fork first; odd-numbered philosophers take the right fork first**. Odd-numbered philosophers also start with a short delay to reduce immediate contention.
 
-Time is measured with `gettimeofday()`, and a custom millisecond sleep function combines elapsed-time checks with short `usleep()` intervals. Simulation output reports elapsed milliseconds from the start time.
+Breaking the uniform acquisition order helps prevent the simple circular-wait deadlock. However, avoiding deadlock alone does **not** guarantee that every philosopher gets enough time to eat.
 
-### Shared State
+The single-philosopher case is handled separately: with only one fork, that philosopher cannot eat and eventually reaches the death deadline.
 
-The simulation stores configuration and shared synchronization objects in a common data structure. Each philosopher has its own ID, thread handle, meal count, last-meal timestamp, and references to its two forks.
+See [`acquire_forks()`](lifecycle.c) and [`philo_routine()`](lifecycle.c).
 
-Careful synchronization is necessary because multiple threads can read or modify related state concurrently.
+### Starvation and Monitoring
+
+The program records each philosopher's **last meal time**. A dedicated monitor regularly checks whether a philosopher has exceeded `time_to_die` without eating.
+
+Conceptually, the time since the last meal is:
+
+```text
+elapsed = current_time - last_meal_time
+```
+
+When the deadline is exceeded and the philosopher is not marked as eating, the monitor sets the shared termination flag and reports a death.
+
+When the optional meal target is provided, the monitor also checks whether **every philosopher** has eaten the requested number of times. If so, the simulation ends.
+
+The checks are implemented in [`monitor.c`](monitor.c).
+
+### Synchronization and Race Conditions
+
+Multiple threads can read or update shared values at the same time. Without synchronization, one thread might see a value while another is in the middle of changing it.
+
+This project uses separate mutexes for different responsibilities:
+
+| Mutex | What it protects |
+|---|---|
+| Fork mutexes | Ownership of each shared fork |
+| Print mutex | Status messages so they do not overlap |
+| Death mutex | The shared stop/death flag |
+| Meal mutex | Last-meal timestamps and meal counts |
+| Per-philosopher eating mutex | The philosopher's eating state |
+
+This division keeps unrelated operations from all competing for a single global lock. The shared structures are defined in [`philosophers.h`](philosophers.h), with setup in [`setup.c`](setup.c).
+
+### Time and Simulation States
+
+The program uses `gettimeofday()` to measure elapsed time in milliseconds and a custom `ft_usleep()` loop for short waits. The routine cycles through fork acquisition, eating, sleeping and thinking until the shared termination flag is set.
+
+A typical message looks like:
+
+```text
+201 3 is eating
+```
+
+This means philosopher 3 began eating 201 milliseconds after the simulation's reference start time. The number is illustrative; exact scheduling and output can vary between runs.
+
+See [`time.c`](time.c), [`lifecycle.c`](lifecycle.c) and [`utils_runtime.c`](utils_runtime.c).
 
 ### References
 
