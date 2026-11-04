@@ -10,6 +10,29 @@ The challenge is to coordinate concurrent threads, protect shared data, and trac
 
 This implementation uses **POSIX threads (`pthread`)**, mutexes, a dedicated monitoring thread, and millisecond-based timing.
 
+## The Dining Philosophers Problem
+
+<p align="center">
+  <img src="docs/dining-philosophers.jpg" alt="Five philosophers around a round table with five shared forks" width="520">
+</p>
+
+Imagine five philosophers sitting around a table. Each has a plate of spaghetti, but there is **only one fork between each pair of neighbors**. To eat, a philosopher needs **both** the fork on their left and the one on their right.
+
+They repeat the same cycle: **think → take forks → eat → put forks down → sleep**. Since neighboring philosophers share forks, they cannot both eat at the same time.
+
+The challenge is not simply to make them take turns. The program must coordinate threads so that forks are never used by two philosophers at once, prevent deadlocks, and detect when someone has gone too long without eating.
+
+### What can go wrong?
+
+| Problem | What happens |
+|---|---|
+| **Race condition** | Threads access shared data without proper synchronization, producing unpredictable results. |
+| **Deadlock** | Everyone holds one fork and waits for a second fork. Nobody can continue. |
+| **Starvation** | A philosopher cannot get the forks in time while others continue eating. |
+| **Timing errors** | Slow monitoring or inaccurate delays cause missed deadlines. |
+
+In the C implementation, **philosophers are threads**, **forks are mutexes**, and a **monitoring thread** watches for starvation and the optional meal limit.
+
 ## Instructions
 
 ### Building the Project
