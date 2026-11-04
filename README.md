@@ -13,7 +13,7 @@ This implementation uses **POSIX threads (`pthread`)**, mutexes, a dedicated mon
 ## The Dining Philosophers Problem
 
 <p align="center">
-  <img src="docs/dining-philosophers.webp" alt="Five philosophers around a round table with five shared forks" width="520">
+  <img src="docs/dining-philosophers.png" alt="The Dining Philosophers Problem" width="380">
 </p>
 
 Imagine five philosophers sitting around a table. Each has a plate of spaghetti, but there is **only one fork between each pair of neighbors**. To eat, a philosopher needs **both** the fork on their left and the one on their right.
